@@ -2147,6 +2147,74 @@ append_dynamic_columns_postgres() {
   fi
 
   # -------------------------------------------------------------------------
+  # v1.6.3 columns - config store tables
+  # -------------------------------------------------------------------------
+
+  # config_client.mcp_server_auth_mode (added in v1.6.3 - varchar(20), default 'headers')
+  if column_exists_postgres "config_client" "mcp_server_auth_mode"; then
+    echo "UPDATE config_client SET mcp_server_auth_mode = 'headers' WHERE id = 1;" >> "$output_file"
+  fi
+
+  # config_client.oauth2_server_config_json (added in v1.6.3 - text, empty string when unset)
+  if column_exists_postgres "config_client" "oauth2_server_config_json"; then
+    echo "UPDATE config_client SET oauth2_server_config_json = '' WHERE id = 1;" >> "$output_file"
+  fi
+
+  # config_keys.bedrock_mantle_* (added in v1.6.3 - nullable text SecretVars for Bedrock Mantle auth)
+  for mantle_col in bedrock_mantle_access_key bedrock_mantle_secret_key bedrock_mantle_session_token bedrock_mantle_region bedrock_mantle_role_arn bedrock_mantle_external_id bedrock_mantle_role_session_name; do
+    if column_exists_postgres "config_keys" "$mantle_col"; then
+      echo "UPDATE config_keys SET $mantle_col = NULL WHERE name = 'migration-test-key-openai';" >> "$output_file"
+      echo "UPDATE config_keys SET $mantle_col = NULL WHERE name = 'migration-test-key-anthropic';" >> "$output_file"
+    fi
+  done
+
+  # governance_model_pricing.is_deprecated (added in v1.6.3 - bool, default false)
+  if column_exists_postgres "governance_model_pricing" "is_deprecated"; then
+    echo "UPDATE governance_model_pricing SET is_deprecated = false WHERE id = 1;" >> "$output_file"
+    echo "UPDATE governance_model_pricing SET is_deprecated = false WHERE id = 2;" >> "$output_file"
+  fi
+
+  # governance_virtual_keys.expires_at (added in v1.6.3 - nullable timestamp, NULL = never expires)
+  if column_exists_postgres "governance_virtual_keys" "expires_at"; then
+    echo "UPDATE governance_virtual_keys SET expires_at = NULL WHERE id = 'vk-migration-test-1';" >> "$output_file"
+    echo "UPDATE governance_virtual_keys SET expires_at = NULL WHERE id = 'vk-migration-test-2';" >> "$output_file"
+  fi
+
+  # -------------------------------------------------------------------------
+  # v1.6.3 columns - config store tables
+  # -------------------------------------------------------------------------
+
+  # config_client.mcp_server_auth_mode (added in v1.6.3 - varchar(20), default 'headers')
+  if column_exists_postgres "config_client" "mcp_server_auth_mode"; then
+    echo "UPDATE config_client SET mcp_server_auth_mode = 'headers' WHERE id = 1;" >> "$output_file"
+  fi
+
+  # config_client.oauth2_server_config_json (added in v1.6.3 - text, empty string when unset)
+  if column_exists_postgres "config_client" "oauth2_server_config_json"; then
+    echo "UPDATE config_client SET oauth2_server_config_json = '' WHERE id = 1;" >> "$output_file"
+  fi
+
+  # config_keys.bedrock_mantle_* (added in v1.6.3 - nullable text SecretVars for Bedrock Mantle auth)
+  for mantle_col in bedrock_mantle_access_key bedrock_mantle_secret_key bedrock_mantle_session_token bedrock_mantle_region bedrock_mantle_role_arn bedrock_mantle_external_id bedrock_mantle_role_session_name; do
+    if column_exists_postgres "config_keys" "$mantle_col"; then
+      echo "UPDATE config_keys SET $mantle_col = NULL WHERE name = 'migration-test-key-openai';" >> "$output_file"
+      echo "UPDATE config_keys SET $mantle_col = NULL WHERE name = 'migration-test-key-anthropic';" >> "$output_file"
+    fi
+  done
+
+  # governance_model_pricing.is_deprecated (added in v1.6.3 - bool, default false)
+  if column_exists_postgres "governance_model_pricing" "is_deprecated"; then
+    echo "UPDATE governance_model_pricing SET is_deprecated = false WHERE id = 1;" >> "$output_file"
+    echo "UPDATE governance_model_pricing SET is_deprecated = false WHERE id = 2;" >> "$output_file"
+  fi
+
+  # governance_virtual_keys.expires_at (added in v1.6.3 - nullable timestamp, NULL = never expires)
+  if column_exists_postgres "governance_virtual_keys" "expires_at"; then
+    echo "UPDATE governance_virtual_keys SET expires_at = NULL WHERE id = 'vk-migration-test-1';" >> "$output_file"
+    echo "UPDATE governance_virtual_keys SET expires_at = NULL WHERE id = 'vk-migration-test-2';" >> "$output_file"
+  fi
+
+  # -------------------------------------------------------------------------
   # v1.6.5 columns - config store / webhooks / log store tables
   # -------------------------------------------------------------------------
 
@@ -3560,6 +3628,14 @@ append_dynamic_columns_sqlite() {
     echo "UPDATE logs SET redaction_mapping = '' WHERE id = 'log-migration-test-001';" >> "$output_file"
     echo "UPDATE logs SET redaction_mapping = '' WHERE id = 'log-migration-test-002';" >> "$output_file"
     echo "UPDATE logs SET redaction_mapping = '' WHERE id = 'log-migration-test-003';" >> "$output_file"
+  # logs.redaction_mapping (added in v1.6.4 via logs_add_redaction_mapping_column -
+  # nullable text, stores the encrypted reversible redaction mapping)
+  if column_exists_sqlite "$logs_db" "logs" "redaction_mapping"; then
+    echo "UPDATE logs SET redaction_mapping = NULL WHERE id = 'log-migration-test-001';" >> "$output_file"
+    echo "UPDATE logs SET redaction_mapping = NULL WHERE id = 'log-migration-test-002';" >> "$output_file"
+    echo "UPDATE logs SET redaction_mapping = NULL WHERE id = 'log-migration-test-003';" >> "$output_file"
+  fi
+
   # logs.redaction_mapping (added in v1.6.4 via logs_add_redaction_mapping_column -
   # nullable text, stores the encrypted reversible redaction mapping)
   if column_exists_sqlite "$logs_db" "logs" "redaction_mapping"; then

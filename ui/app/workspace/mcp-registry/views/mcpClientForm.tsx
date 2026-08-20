@@ -280,36 +280,36 @@ const ClientForm: React.FC<ClientFormProps> = ({ open, onClose, onSaved }) => {
 			stdio_config:
 				connectionType === "stdio"
 					? {
-						command: data.stdio_config?.command || "",
-						args: parseArrayFromText(argsText),
-						// Each row becomes KEY=value, or a bare KEY when no value is given
-						// (read from Bifrost's host environment). Rows without a name are skipped.
-						envs: Object.entries(envVars)
-							.filter(([name]) => name.trim() !== "")
-							.map(([name, value]) => {
-								const v = value.trim();
-								return v ? `${name}=${v}` : name;
-							}),
-					}
+							command: data.stdio_config?.command || "",
+							args: parseArrayFromText(argsText),
+							// Each row becomes KEY=value, or a bare KEY when no value is given
+							// (read from Bifrost's host environment). Rows without a name are skipped.
+							envs: Object.entries(envVars)
+								.filter(([name]) => name.trim() !== "")
+								.map(([name, value]) => {
+									const v = value.trim();
+									return v ? `${name}=${v}` : name;
+								}),
+						}
 					: undefined,
 			tls_config: connectionType === "http" || connectionType === "sse" ? buildTLSConfigPayload(data.tls_config) : undefined,
 			oauth_config:
 				authType === "oauth" || authType === "per_user_oauth"
 					? {
-						client_id: data.oauth_config?.client_id ?? emptySecretVar,
-						client_secret:
-							data.oauth_config?.client_secret?.value ||
+							client_id: data.oauth_config?.client_id ?? emptySecretVar,
+							client_secret:
+								data.oauth_config?.client_secret?.value ||
 								data.oauth_config?.client_secret?.type === "env" ||
 								data.oauth_config?.client_secret?.type === "vault"
-								? data.oauth_config.client_secret
-								: undefined,
-						authorize_url: data.oauth_config?.authorize_url || undefined,
-						token_url: data.oauth_config?.token_url || undefined,
-						registration_url: data.oauth_config?.registration_url || undefined,
-						scopes: scopesText.trim() ? parseArrayFromText(scopesText) : undefined,
-						server_url: data.connection_string?.value || undefined,
-						resource: resourceText.trim() || undefined,
-					}
+									? data.oauth_config.client_secret
+									: undefined,
+							authorize_url: data.oauth_config?.authorize_url || undefined,
+							token_url: data.oauth_config?.token_url || undefined,
+							registration_url: data.oauth_config?.registration_url || undefined,
+							scopes: scopesText.trim() ? parseArrayFromText(scopesText) : undefined,
+							server_url: data.connection_string?.value || undefined,
+							resource: resourceText.trim() || undefined,
+						}
 					: undefined,
 			// "headers" and "per_user_headers" both can carry static admin
 			// headers on data.headers (per-user values are submitted
@@ -380,14 +380,14 @@ const ClientForm: React.FC<ClientFormProps> = ({ open, onClose, onSaved }) => {
 	return (
 		<Sheet open={open} onOpenChange={(open) => !open && !oauthFlow && onClose()}>
 			<SheetContent className="flex w-full flex-col gap-4 overflow-x-hidden p-0 pt-4">
-				<SheetHeader className="flex flex-col items-start px-0 py-4" headerClassName="mb-0 sticky -top-4 bg-card z-10 px-8">
+				<SheetHeader className="flex flex-col items-start px-0 py-4" headerClassName="mb-0 sticky -top-4 bg-card z-10 px-4 md:px-8">
 					<SheetTitle>New MCP Server</SheetTitle>
 					<SheetDescription>Configure and connect to a new Model Context Protocol server.</SheetDescription>
 				</SheetHeader>
 
 				<Form {...methods}>
 					<form onSubmit={handleSubmit(onSubmit)} className="flex h-full flex-col gap-6">
-						<div className="grow space-y-4 px-8">
+						<div className="grow space-y-4 px-4 md:px-8">
 							{/* Name */}
 							<FormField
 								control={control}
@@ -979,7 +979,7 @@ const ClientForm: React.FC<ClientFormProps> = ({ open, onClose, onSaved }) => {
 						</div>
 
 						{/* Form Footer */}
-						<div className="bg-card sticky bottom-0 z-10 flex justify-end gap-2 border-t px-8 py-4">
+						<div className="bg-card sticky bottom-0 z-10 flex justify-end gap-2 border-t px-4 py-4 md:px-8">
 							<Button type="button" variant="outline" onClick={onClose} disabled={isLoading} data-testid="cancel-client-btn">
 								Cancel
 							</Button>

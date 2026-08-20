@@ -4,9 +4,18 @@
 
 Official Helm charts for deploying [Bifrost](https://github.com/maximhq/bifrost) - a high-performance AI gateway with unified interface for multiple providers.
 
-**Latest Version:** 2.1.35
+**Latest Version:** 2.1.36
 
 ## Changelog
+
+### Upcoming
+
+- Added `bifrost.plugins.splunk` — the Splunk HTTP Event Collector (HEC) observability connector (Enterprise): one flattened event per request to `events_index` plus the derived metric set to `metrics_index`, with TLS (`ca_cert` / `insecure_skip_verify`), a content toggle (`disable_content_logging`), request-header capture, and indexer acknowledgement (`indexer_ack`, `ack_poll_interval_ms`, `ack_timeout_ms`, `max_ack_attempts`). Renders into the `splunk` plugin config.
+
+### 2.1.36
+
+- Added `bifrost.scim.config.claimsSyncMode` (`both` default, or `scim`) to every SCIM/SSO provider — selects, when SCIM is enabled, whether IdP login/refresh claims still drive role/team/business-unit/profile sync and JIT user creation (`both`) or SCIM is the sole source of truth (`scim`). Renders into the provider's `claimsSyncMode`.
+- Made `bifrost.scim.config.apiToken` optional for the Okta provider — removed it from the Okta config `required` set (it was contradicting the docs, which describe the API token as optional and only needed for 24-hour background user/group reconciliation). SCIM validation now requires only `issuerUrl`, `clientId`, and `clientSecret`.
 
 ### 2.1.35
 

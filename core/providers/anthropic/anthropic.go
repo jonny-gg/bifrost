@@ -1313,7 +1313,7 @@ func HandleAnthropicResponsesRequest(
 	if isLargeResp, _ := ctx.Value(schemas.BifrostContextKeyLargeResponseMode).(bool); isLargeResp {
 		preview, _ := ctx.Value(schemas.BifrostContextKeyLargePayloadResponsePreview).(string)
 		return &schemas.BifrostResponsesResponse{
-			ID:        schemas.Ptr("resp_" + providerUtils.GetRandomString(50)),
+			ID:        schemas.Ptr("resp_" + schemas.GetRandomString(50)),
 			Object:    "response",
 			CreatedAt: int(time.Now().Unix()),
 			Model:     request.Model,
@@ -2282,8 +2282,9 @@ func (provider *AnthropicProvider) BatchResults(ctx *schemas.BifrostContext, key
 		})
 
 		batchResultsResp := &schemas.BifrostBatchResultsResponse{
-			BatchID: request.BatchID,
-			Results: results,
+			BatchID:  request.BatchID,
+			Endpoint: schemas.BatchEndpointMessages,
+			Results:  results,
 			ExtraFields: schemas.BifrostResponseExtraFields{
 				Latency: latency.Milliseconds(),
 			},
@@ -2978,6 +2979,11 @@ func (provider *AnthropicProvider) VideoDelete(_ *schemas.BifrostContext, _ sche
 // VideoList is not supported by the Anthropic provider.
 func (provider *AnthropicProvider) VideoList(_ *schemas.BifrostContext, _ schemas.Key, _ *schemas.BifrostVideoListRequest) (*schemas.BifrostVideoListResponse, *schemas.BifrostError) {
 	return nil, providerUtils.NewUnsupportedOperationError(schemas.VideoListRequest, provider.GetProviderKey())
+}
+
+// VideoEdit is not supported by the Anthropic provider.
+func (provider *AnthropicProvider) VideoEdit(_ *schemas.BifrostContext, _ schemas.Key, _ *schemas.BifrostVideoEditRequest) (*schemas.BifrostVideoEditResponse, *schemas.BifrostError) {
+	return nil, providerUtils.NewUnsupportedOperationError(schemas.VideoEditRequest, provider.GetProviderKey())
 }
 
 // VideoRemix is not supported by the Anthropic provider.

@@ -1,6 +1,6 @@
-[feat]: support cache bypass and Direct Key namespace config [@jonny-gg](https://github.com/jonny-gg)
-
 ## ✨ Features
+
+- [feat]: support cache bypass and Direct Key namespace config [@jonny-gg](https://github.com/jonny-gg)
 
 - **MCP Per-User OAuth** - MCP clients can hold per-user OAuth credentials and per-user headers, configurable from `config.json` as well as the UI, with a documented shared vs per-identity token lookup contract and VK/Users filters on the OAuth Grants and MCP Auth Sessions sidebars
 - **Token Exchange IDP Credentials** - New `use_idp_credentials` on `token_exchange` reuses SSO login app credentials for providers that require it, such as Microsoft Entra ID; `client_id` becomes optional when it is set (#6068, #6069)
@@ -23,6 +23,7 @@
 
 ## 🐞 Fixed
 
+- **GenAI SSE Heartbeats** - GenAI streams delimit heartbeat comments so Google SDK clients preserve the following event (thanks [@dani29](https://github.com/dani29)!) (#6240)
 - **Path Normalization Auth Bypass** - Fixed a path normalization flaw that allowed auth to be bypassed (#5763)
 - **Minimal Reasoning Effort on GPT-5 Models** - `reasoning_effort: "minimal"` is preserved for GPT-5-family OpenAI models instead of being downgraded to `low` (thanks [@jitokim](https://github.com/jitokim)!) (#6046)
 - **Gemini Truncated Response Finish Reason** - Truncated Gemini responses report `MAX_TOKENS` instead of `OTHER` (thanks [@AdityaPainuli](https://github.com/AdityaPainuli)!) (#5979)

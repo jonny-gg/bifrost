@@ -1,5 +1,3 @@
-[fix]: escape colons in Redis tag query values [@jonny-gg](https://github.com/jonny-gg)
-
 - feat: add `cost_per_request` flat-fee pricing field across DB, cost engine, overrides and docs (#6079)
 - feat(modelcatalog): resolve pricing overrides for catalog rows (#6055)
 - feat: add `use_idp_credentials` to token-exchange config (#6068)
@@ -30,3 +28,4 @@ This release adds 18 database migrations. `merge_oauth_token_tables`, `drop_oaut
 
 All eight logstore migrations in this release alter `logs` or `mcp_tool_logs`, the two highest-insert tables in Bifrost, and several also build indexes on them. On a busy instance those index builds block concurrent log inserts until they complete. Schedule the upgrade for a low-traffic period, or expect elevated log-write latency while the migrations run.
 </Warning>
+- [fix]: escape colons in Redis tag query values [@jonny-gg](https://github.com/jonny-gg)

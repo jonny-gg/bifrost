@@ -288,6 +288,9 @@ var logstoreMigrationSteps = []migrationStep{
 	{IDs: []string{"logs_recreate_matviews_with_app_column"}, run: migrationRecreateMatViewsWithUserAgentColumn},
 	{IDs: []string{"mcp_tool_logs_add_endpoint_columns"}, run: migrationAddEndpointColumnsToMCPToolLogs},
 	{IDs: []string{"mcp_tool_logs_add_plugin_logs_column"}, run: migrationAddMCPPluginLogsColumn},
+	{IDs: []string{"logs_add_video_edit_input_column"}, run: migrationAddVideoEditInputColumn},
+	{IDs: []string{"logs_add_upstream_and_overhead_latency_columns"}, run: migrationAddUpstreamAndOverheadLatencyColumns},
+	{IDs: []string{"logs_add_batch_debug_column"}, run: migrationAddBatchDebugColumn},
 }
 
 // areThereAnyPendingMigrations returns true if there are any pending migrations to be applied.
@@ -625,6 +628,43 @@ func migrationAddGuardrailDebugColumn(ctx context.Context, db *gorm.DB, logger s
 	}})
 	if err := m.Migrate(); err != nil {
 		return fmt.Errorf("error while adding guardrail_debug column: %s", err.Error())
+	}
+	return nil
+}
+
+// migrationAddUpstreamAndOverheadLatencyColumns adds the upstream_latency and
+// overhead_latency columns to the logs table.
+func migrationAddUpstreamAndOverheadLatencyColumns(ctx context.Context, db *gorm.DB, logger schemas.Logger) error {
+	migrationName := "logs_add_upstream_and_overhead_latency_columns"
+	logger.Info("[logstore] starting migration %s", migrationName)
+	defer logger.Info("[logstore] finished migration %s", migrationName)
+	opts := *migrator.DefaultOptions
+	opts.UseTransaction = true
+	m := migrator.New(db, &opts, []*migrator.Migration{{
+		ID: migrationName,
+		Migrate: func(tx *gorm.DB) error {
+			tx = tx.WithContext(ctx)
+			if err := addColumnIfNotExists(tx, logger, &Log{}, "upstream_latency"); err != nil {
+				return err
+			}
+			if err := addColumnIfNotExists(tx, logger, &Log{}, "overhead_latency"); err != nil {
+				return err
+			}
+			return nil
+		},
+		Rollback: func(tx *gorm.DB) error {
+			tx = tx.WithContext(ctx)
+			if err := dropColumnIfExists(tx, logger, &Log{}, "upstream_latency"); err != nil {
+				return err
+			}
+			if err := dropColumnIfExists(tx, logger, &Log{}, "overhead_latency"); err != nil {
+				return err
+			}
+			return nil
+		},
+	}})
+	if err := m.Migrate(); err != nil {
+		return fmt.Errorf("error while adding upstream/overhead latency columns: %s", err.Error())
 	}
 	return nil
 }
@@ -2894,6 +2934,32 @@ func migrationAddMCPPluginLogsColumn(ctx context.Context, db *gorm.DB, logger sc
 	return nil
 }
 
+// migrationAddBatchDebugColumn adds the batch_debug column to the logs table.
+// It carries provider request counts on batch rows and the per-model pricing
+// breakdown on the aggregate cost row. Nullable and unindexed, so this is a
+// metadata-only DDL change with no table rewrite and no backfill: rows written
+// before it simply have no batch detail.
+func migrationAddBatchDebugColumn(ctx context.Context, db *gorm.DB, logger schemas.Logger) error {
+	migrationName := "logs_add_batch_debug_column"
+	logger.Info("[logstore] starting migration %s", migrationName)
+	defer logger.Info("[logstore] finished migration %s", migrationName)
+	opts := *migrator.DefaultOptions
+	opts.UseTransaction = true
+	m := migrator.New(db, &opts, []*migrator.Migration{{
+		ID: migrationName,
+		Migrate: func(tx *gorm.DB) error {
+			return addColumnIfNotExists(tx.WithContext(ctx), logger, &Log{}, "batch_debug")
+		},
+		Rollback: func(tx *gorm.DB) error {
+			return dropColumnIfExists(tx.WithContext(ctx), logger, &Log{}, "batch_debug")
+		},
+	}})
+	if err := m.Migrate(); err != nil {
+		return fmt.Errorf("error while adding batch_debug column: %s", err.Error())
+	}
+	return nil
+}
+
 // migrationAddAliasColumn adds the alias column to the logs table.
 // The alias field stores the original model name the caller used when routing resolved it to a different model via alias mapping.
 // Index creation is deferred to ensurePerformanceIndexes (called post-startup in a background goroutine)
@@ -4157,6 +4223,37 @@ func migrationAddBillingFidelityColumns(ctx context.Context, db *gorm.DB, logger
 	}})
 	if err := m.Migrate(); err != nil {
 		return fmt.Errorf("error while adding billing fidelity columns: %s", err.Error())
+	}
+	return nil
+}
+
+// migrationAddVideoEditInputColumn adds the video_edit_input column to the logs table.
+func migrationAddVideoEditInputColumn(ctx context.Context, db *gorm.DB, logger schemas.Logger) error {
+	migrationName := "logs_add_video_edit_input_column"
+	logger.Info("[logstore] starting migration %s", migrationName)
+	defer logger.Info("[logstore] finished migration %s", migrationName)
+	opts := *migrator.DefaultOptions
+	opts.UseTransaction = true
+	m := migrator.New(db, &opts, []*migrator.Migration{{
+		ID: migrationName,
+		Migrate: func(tx *gorm.DB) error {
+			tx = tx.WithContext(ctx)
+			if err := addColumnIfNotExists(tx, logger, &Log{}, "video_edit_input"); err != nil {
+				return err
+			}
+			return nil
+		},
+		Rollback: func(tx *gorm.DB) error {
+			tx = tx.WithContext(ctx)
+			if err := dropColumnIfExists(tx, logger, &Log{}, "video_edit_input"); err != nil {
+				return err
+			}
+			return nil
+		},
+	}})
+	err := m.Migrate()
+	if err != nil {
+		return fmt.Errorf("error while adding video edit input column: %s", err.Error())
 	}
 	return nil
 }
